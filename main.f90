@@ -3,12 +3,26 @@ program main
     integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:)
     integer :: N = 0, E = 0
     integer :: node1, node2, n_links ! for reading input file
-    integer :: iostat, i ! helper integers
+    integer :: iostat, i, num_args ! helper integers
     character (len=100) :: filename = "./nets/net1000.dat"
+    character (len=100) :: arg
+    double precision :: initial_infected_rate, lambda, delta, time
     !character (len=100) :: filename = "input.dat"
-
-    double precision :: initial_infected_rate = .01, time
+    common /parameters/ lambda, delta
+    
     integer, allocatable :: infected_list(:)
+
+    num_args = command_argument_count()
+    print*,num_args
+
+    call get_command_argument(1,arg)
+    filename = arg
+    call get_command_argument(2,arg)
+    read(arg,*) initial_infected_rate
+    call get_command_argument(3,arg)
+    read(arg,*) lambda
+    call get_command_argument(4,arg)
+    read(arg,*) delta
 
     call cpu_time(time)
     call srand(int(time*1e7))
@@ -60,6 +74,7 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
     integer :: iostat, node1, node2, i, n_links
     integer :: status_count(3) 
     double precision :: lambda, delta, prob_inf, prob_rec
+    common /parameters/ lambda, delta
     ! 2nd input read: find cardinality of all nodes
     rewind(unit = 1)
     cardinality = 0
@@ -106,9 +121,6 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
     enddo
     
     write(2,*)status_count
-
-    lambda = 0.001    
-    delta = 0.1
 
     prob_rec = status_count(2) * delta / ( status_count(2) * delta + n_links * lambda )
     prob_inf = n_links * lambda / ( n_links * lambda + status_count(2) * delta )
