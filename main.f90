@@ -4,15 +4,15 @@ program main
     integer :: N = 0, E = 0
     integer :: node1, node2, n_links ! for reading input file
     integer :: iostat, i ! helper integers
-    character (len=100) :: filename = "net1000.dat"
+    character (len=100) :: filename = "./nets/net1000.dat"
     !character (len=100) :: filename = "input.dat"
 
-    double precision :: initial_infected_rate = .01
+    double precision :: initial_infected_rate = .01, time
     integer, allocatable :: infected_list(:)
 
-    ! print*, "Write the name of the input file"
-    ! read (*, *) filename
-
+    call cpu_time(time)
+    call srand(int(time*1e7))
+    
     open (unit = 1, file = filename, status = "old", action = "read")
     open (unit = 2, file = "sir.out", action = "write")
 
@@ -37,7 +37,6 @@ program main
 
     infected_list = 0
 
-    call srand(165)
     
     ! S = 0, I = 1, R = 2 
     do i = 1, N
@@ -47,7 +46,6 @@ program main
     enddo
 
     do i = 1, 20
-
         call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
     enddo
 
@@ -108,15 +106,12 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
     enddo
     
     write(2,*)status_count
-    print*,n_links
 
-    lambda = 0.5
-    delta = 0.5
+    lambda = 0.001    
+    delta = 0.1
 
     prob_rec = status_count(2) * delta / ( status_count(2) * delta + n_links * lambda )
     prob_inf = n_links * lambda / ( n_links * lambda + status_count(2) * delta )
-
-    print*,status_count, n_links
 
     do i = 1, N
         if (infected_list(i).eq.0) then
@@ -127,3 +122,5 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
     enddo
 
 end subroutine time_step_gillespie
+
+
