@@ -1,5 +1,7 @@
 # compiled stuff
 *.out
+*.x
 
 # data
 *.dat
+
