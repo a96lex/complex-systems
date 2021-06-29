@@ -13,7 +13,7 @@ gfortran -o main.x main.f90
 ##### Usage
 
 ```
-main.x <filename> <initial_infected_rate> <lambda> <delta>
+./main.x <filename> <initial_infected_rate> <lambda> <delta>
 ```
 
 - filename: name of the file containing pairs of connected nodes
