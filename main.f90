@@ -3,7 +3,7 @@ program main
     integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:)
     integer :: N = 0, E = 0
     integer :: node1, node2, n_links ! for reading input file
-    integer :: iostat, i, num_args ! helper integers
+    integer :: iostat, i ! helper integers
     character (len=100) :: filename = "./nets/net1000.dat"
     character (len=100) :: arg
     double precision :: initial_infected_rate, lambda, delta, time
@@ -11,9 +11,6 @@ program main
     common /parameters/ lambda, delta
     
     integer, allocatable :: infected_list(:)
-
-    num_args = command_argument_count()
-    print*,num_args
 
     call get_command_argument(1,arg)
     filename = arg
