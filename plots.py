@@ -15,6 +15,14 @@ class iInput:
     iterations = 20
 
 
+def execute_cmd(input=iInput()):
+    """
+    Executes fortran code with set interface
+    """
+    command = f"./main.x {input.filename} {input.initial_infected_rate} {input._lambda} {input.delta} {input.iterations}"
+    os.system(command)
+
+
 def parse_output(input_file=""):
     """
     Parses the optput file generated in Fortran
@@ -46,8 +54,7 @@ def sir_over_time():
 
     # create a plot for each input interface
     for _ in range(1):
-        command = f"./main.x {i.filename} {i.initial_infected_rate} {i._lambda} {i.delta} {i.iterations}"
-        os.system(command)
+        execute_cmd(input=i)
         S, I, R = parse_output(input_file="sir.out")
         plt.plot(S, label="S")
         plt.plot(I, label="I")
@@ -69,9 +76,7 @@ def labda_dependency():
 
     # create a plot for each input interface
     for _ in range(5):
-        os.system(
-            f"./main.x {i.filename} {i.initial_infected_rate} {i._lambda} {i.delta} {i.iterations}"
-        )
+        execute_cmd(input=i)
         S, I, R = parse_output(input_file="sir.out")
         plt.plot(I, label=f"lambda: {i._lambda}")
 
