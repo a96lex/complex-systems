@@ -20,6 +20,7 @@ def parse_output(input_file=""):
     Parses the optput file generated in Fortran
     Takes filename as input and returns np arrays as output for S, I and R
     """
+
     S = []
     I = []
     R = []
