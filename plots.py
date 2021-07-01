@@ -10,8 +10,8 @@ class iInput:
 
     filename = "nets/net1000.dat"
     initial_infected_rate = 0.01
-    _lambda = 0.007
-    delta = 0.7
+    _lambda = 0.0001
+    delta = 0.5
     iterations = 20
 
 
@@ -21,9 +21,7 @@ def parse_output(input_file=""):
     Takes filename as input and returns np arrays as output for S, I and R
     """
 
-    S = []
-    I = []
-    R = []
+    S, I, R = [], [], []
 
     try:
         file_list = open(input_file, "r")
@@ -41,7 +39,31 @@ def parse_output(input_file=""):
     return S, I, R
 
 
-def main():
+def sir_over_time():
+    # create Fortran interface object
+    i = iInput()
+    i.iterations = 100
+
+    # create a plot for each input interface
+    for _ in range(1):
+        command = f"./main.x {i.filename} {i.initial_infected_rate} {i._lambda} {i.delta} {i.iterations}"
+        os.system(command)
+        S, I, R = parse_output(input_file="sir.out")
+        plt.plot(S, label="S")
+        plt.plot(I, label="I")
+        plt.plot(R, label="R")
+
+        # modify interface
+        i._lambda += 0.02
+
+    plt.ylabel("Population")
+    plt.xlabel("Time (arbitrary)")
+    plt.legend()
+    plt.savefig("figures/sir_over_time.png")
+    plt.close()
+
+
+def labda_dependency():
     # create Fortran interface object
     i = iInput()
 
@@ -59,8 +81,11 @@ def main():
     plt.ylabel("Infected")
     plt.xlabel("time")
     plt.legend()
-    plt.show()
+    plt.savefig("figures/lambda_dependency.png")
+    plt.close()
 
 
 if __name__ == "__main__":
-    main()
+    os.system("gfortran -o main.x main.f90")
+    sir_over_time()
+    labda_dependency()
