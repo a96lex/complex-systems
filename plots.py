@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import re
 import os
@@ -38,7 +37,7 @@ def parse_output(input_file=""):
         I.append(float(s[1]))
         R.append(float(s[2]))
 
-    return np.array(S), np.array(I), np.array(R)
+    return S, I, R
 
 
 def main():
