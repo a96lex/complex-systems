@@ -1,33 +1,50 @@
 program main
     implicit none
     integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:)
-    integer :: N = 0, E = 0
-    integer :: node1, node2, n_links ! for reading input file
-    integer :: iostat, i ! helper integers
-    character (len=100) :: filename = "./nets/net1000.dat"
-    character (len=100) :: arg
+    integer :: N = 0, E = 0, node1, node2, n_links 
+    integer :: iostat, i, ioerror, total_iterations
+    character (len=100) :: filename, cmd_arg
     double precision :: initial_infected_rate, lambda, delta, time
-    !character (len=100) :: filename = "input.dat"
     common /parameters/ lambda, delta
     
     integer, allocatable :: infected_list(:)
 
-    call get_command_argument(1,arg)
-    filename = arg
-    call get_command_argument(2,arg)
-    read(arg,*) initial_infected_rate
-    call get_command_argument(3,arg)
-    read(arg,*) lambda
-    call get_command_argument(4,arg)
-    read(arg,*) delta
+    ! Checking for correct code usage
+    if (command_argument_count().ne.5) then
+        print*, "Command line argument cout is different than 5. Check readme.md to learn how to properly use this code"
+        stop
+    endif
+    
+    ! Getting arguments from command line
+    call get_command_argument(1,cmd_arg)
+    filename = cmd_arg
+    call get_command_argument(2,cmd_arg)
+    read(cmd_arg,*,iostat=iostat) initial_infected_rate
+    if (iostat.ne.0) ioerror = iostat
+    call get_command_argument(3,cmd_arg)
+    read(cmd_arg,*,iostat=iostat) lambda
+    if (iostat.ne.0) ioerror = iostat
+    call get_command_argument(4,cmd_arg)
+    read(cmd_arg,*,iostat=iostat) delta
+    if (iostat.ne.0) ioerror = iostat
+    call get_command_argument(5,cmd_arg)
+    read(cmd_arg,"(i8)",iostat=iostat) total_iterations
+    if (iostat.ne.0) ioerror = iostat
 
+    ! Check for input errors
+    if (ioerror.ne.0) then
+        print*, "At least one of the command line arguments is wrong. Check readme.md to learn how to properly use this code"
+        stop
+    endif
+
+    ! Use ms of CPU clock as seed
     call cpu_time(time)
     call srand(int(time*1e7))
     
     open (unit = 1, file = filename, status = "old", action = "read")
     open (unit = 2, file = "sir.out", action = "write")
 
-    ! 1st input read: find N and E
+    ! Find N and E
     do
         read(unit = 1, fmt = *, iostat = iostat) node1, node2
         if (iostat .ne. 0) exit
@@ -35,44 +52,12 @@ program main
         if (node1 > N) N = node1
         if (node2 > N) N = node2
         E = E +1
-
     enddo
 
     ! Allocate vectors
-    allocate(neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N))
+    allocate(neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N),infected_list(N))
 
-
-    ! Infectate random agents
-
-    allocate(infected_list(N))
-
-    infected_list = 0
-
-    
-    ! S = 0, I = 1, R = 2 
-    do i = 1, N
-        if(rand() < initial_infected_rate) then
-            infected_list(i) = 1
-        endif
-    enddo
-
-    do i = 1, 20
-        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
-    enddo
-
-    close(unit = 1)
-    close(unit = 2)
-
-end program main
- 
-subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
-    implicit none
-    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N), infected_list(N)
-    integer :: iostat, node1, node2, i, n_links
-    integer :: status_count(3) 
-    double precision :: lambda, delta, prob_inf, prob_rec
-    common /parameters/ lambda, delta
-    ! 2nd input read: find cardinality of all nodes
+    ! Find cardinality of all nodes
     rewind(unit = 1)
     cardinality = 0
     n_links = 0
@@ -82,7 +67,7 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
         cardinality(node1) = cardinality(node1)+1
         cardinality(node2) = cardinality(node2)+1
     enddo   
-    
+
     ! Construct pointer vectors
     pointer_i(1) = 1
     pointer_f(1) = cardinality(1)
@@ -92,17 +77,46 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
         pointer_f(i) = pointer_f(i-1) + cardinality(i) 
     enddo
 
-    ! 3rd input read: construct main vector
+    ! Infectate random agents
+    infected_list = 0
+
+    ! S = 0, I = 1, R = 2 
+    do i = 1, N
+        if(rand() < initial_infected_rate) then
+            infected_list(i) = 1
+        endif
+    enddo
+
+    ! Perform Gillespie algorithm simulation
+    do i = 1, total_iterations
+        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
+    enddo
+
+    ! Close all i/o files
+    close(unit = 1)
+    close(unit = 2)
+
+end program main
+ 
+subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
+    implicit none
+    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N), infected_list(N)
+    integer :: iostat, node1, node2, i, n_links, status_count(3) 
+    double precision :: lambda, delta, prob_inf, prob_rec
+    common /parameters/ lambda, delta
+
+    ! Construct main vector
     neighbours = 0
     pointer_f = pointer_i - 1
     rewind(unit = 1)
 
+    ! Save active links to neighbours
     do
         read(unit = 1, fmt = *, iostat = iostat)  node1, node2
         if (iostat .ne. 0) exit
         pointer_f(node1) = pointer_f(node1) + 1
         pointer_f(node2) = pointer_f(node2) + 1
-        ! only if one node is S and the other is I
+        ! The link is active only if one node is S and the other is I
         if (infected_list(node1).eq.0.and.infected_list(node2).eq.1.or.infected_list(node1).eq.1.and.infected_list(node2).eq.0) then
             neighbours(pointer_f(node1)) = node2 
             neighbours(pointer_f(node2)) = node1 
@@ -110,21 +124,25 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinal
         endif
     enddo
 
+    ! Count status of all nodes (S = 0, I = 1, R = 2 )
     status_count = 0
-
     do i=1,N
-        !cosa = infected_list(i) ! puede ser = 0, 1 o 2
         status_count(infected_list(i)+1) = status_count(infected_list(i)+1) +1 
     enddo
     
+    ! Write count to file
     write(2,*)status_count
 
+    ! Compute infection and recovery probabilities
     prob_rec = status_count(2) * delta / ( status_count(2) * delta + n_links * lambda )
     prob_inf = n_links * lambda / ( n_links * lambda + status_count(2) * delta )
 
+    ! Loop through all nodes
     do i = 1, N
+        ! If susceptible, try to infect
         if (infected_list(i).eq.0) then
             if (rand() < prob_inf) infected_list(i) = 1
+        ! If infected, try to recover
         elseif (infected_list(i).eq.1) then
             if (rand() < prob_rec) infected_list(i) = 2
         endif
