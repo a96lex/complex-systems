@@ -34,6 +34,7 @@ def parse_output(input_file=""):
     try:
         file_list = open(input_file, "r")
         lines = file_list.readlines()
+        file_list.close()
     except Exception as e:
         print(e)
         lines = []
