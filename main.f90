@@ -1,13 +1,11 @@
 program main
     implicit none
-    integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:)
+    integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:),  infected_list(:)
     integer :: N = 0, E = 0, node1, node2, n_links 
     integer :: iostat, i, ioerror, total_iterations
     character (len=100) :: filename, cmd_arg
     double precision :: initial_infected_rate, lambda, delta, time
     common /parameters/ lambda, delta
-    
-    integer, allocatable :: infected_list(:)
 
     ! Checking for correct code usage
     if (command_argument_count().ne.5) then
