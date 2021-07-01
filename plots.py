@@ -51,7 +51,7 @@ def main():
             f"./main.x {i.filename} {i.initial_infected_rate} {i._lambda} {i.delta} {i.iterations}"
         )
         S, I, R = parse_output(input_file="sir.out")
-        plt.plot(I, label=f"{i._lambda=}")
+        plt.plot(I, label=f"lambda: {i._lambda}")
 
         # modify interface
         i._lambda += 0.02
