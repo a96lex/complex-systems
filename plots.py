@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
-import re
 import os
+import re
+import matplotlib.pyplot as plt
 
 
 class iInput:
