@@ -16,16 +16,22 @@ class iInput:
     iterations = 20
 
 
-def parse_output(input_file):
-    """ "
+def parse_output(input_file=""):
+    """
     Parses the optput file generated in Fortran
     Takes filename as input and returns np arrays as output for S, I and R
     """
     S = []
     I = []
     R = []
-    file_list = open(input_file, "r")
-    lines = file_list.readlines()
+
+    try:
+        file_list = open(input_file, "r")
+        lines = file_list.readlines()
+    except Exception as e:
+        print(e)
+        lines = []
+
     for line in lines:
         s = re.findall(r"[-+]?\d*\.\d+|\d+", line)
         S.append(float(s[0]))
@@ -44,7 +50,7 @@ def main():
         os.system(
             f"./main.x {i.filename} {i.initial_infected_rate} {i._lambda} {i.delta} {i.iterations}"
         )
-        S, I, R = parse_output("sir.out")
+        S, I, R = parse_output(input_file="sir.out")
         plt.plot(I, label=f"{i._lambda=}")
 
         # modify interface
