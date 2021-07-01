@@ -11,7 +11,7 @@ program main
 
     ! Checking for correct code usage
     if (command_argument_count().ne.5) then
-        print*, "Command line argument cout is different than 5. Check readme.md to learn how to properly use this code"
+        print*, "Command line argument count is different than 5. Check readme.md to learn how to properly use this code"
         stop
     endif
     
@@ -89,7 +89,7 @@ program main
 
     ! Perform Gillespie algorithm simulation
     do i = 1, total_iterations
-        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
+        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, infected_list, n_links)
     enddo
 
     ! Close all i/o files
@@ -98,9 +98,9 @@ program main
 
 end program main
  
-subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, cardinality, infected_list, n_links)
+subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected_list, n_links)
     implicit none
-    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N), infected_list(N)
+    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), infected_list(N)
     integer :: iostat, node1, node2, i, n_links, status_count(3) 
     double precision :: lambda, delta, prob_inf, prob_rec
     common /parameters/ lambda, delta
