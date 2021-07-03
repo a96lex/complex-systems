@@ -154,14 +154,14 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected
     ! Loop through all nodes
     do i = 1, N
         ! If susceptible, try to infect
-        if (infected_list(i).eq.0) then
+        if (infected_list(i).eq.0.and.n_links.gt.1) then
             if (rand() < prob_inf) then
                  infected_list(i) = 1
                 call update_active_link_list(E, N, neighbours, pointer_i, pointer_f, &
                      infected_list, active_links, infected_list_pointer, n_links, i, .true.)
             endif
        ! If infected, try to recover
-        elseif (infected_list(i).eq.1) then
+        elseif (infected_list(i).eq.1.and.n_links.gt.1) then
             if (rand() < prob_rec) then
                  infected_list(i) = 2
                 call update_active_link_list(E, N, neighbours, pointer_i, pointer_f, &
