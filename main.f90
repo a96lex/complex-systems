@@ -1,6 +1,7 @@
 program main
     implicit none
-    integer, allocatable :: neighbours(:), pointer_i(:), pointer_f(:), cardinality(:),  infected_list(:)
+    integer, dimension (:), allocatable :: infected_list_pointer, neighbours, pointer_i, pointer_f, cardinality,  infected_list
+    integer, dimension (:,:), allocatable :: active_links
     integer :: N = 0, E = 0, node1, node2, n_links 
     integer :: iostat, i, ioerror, total_iterations
     character (len=100) :: filename, cmd_arg
@@ -53,7 +54,7 @@ program main
     enddo
 
     ! Allocate vectors
-    allocate(neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N),infected_list(N))
+    allocate(active_links(2,2*E), neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N),infected_list(N))
 
     ! Find cardinality of all nodes
     rewind(unit = 1)
@@ -85,6 +86,28 @@ program main
         endif
     enddo
 
+
+    ! Construct main vector
+    neighbours = 0
+    active_links = 0
+    infected_list_pointer = 0
+    pointer_f = pointer_i - 1
+    rewind(unit = 1)
+
+    ! Save active links to neighbours
+    do
+        read(unit = 1, fmt = *, iostat = iostat)  node1, node2
+        if (iostat .ne. 0) exit
+        pointer_f(node1) = pointer_f(node1) + 1
+        pointer_f(node2) = pointer_f(node2) + 1
+        ! The link is active only if one node is S and the other is I
+        if (infected_list(node1).eq.0.and.infected_list(node2).eq.1.or.infected_list(node1).eq.1.and.infected_list(node2).eq.0) then
+            neighbours(pointer_f(node1)) = node2 
+            neighbours(pointer_f(node2)) = node1 
+            n_links = n_links + 1
+        endif
+    enddo
+
     ! Perform Gillespie algorithm simulation
     do i = 1, total_iterations
         call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, infected_list, n_links)
@@ -103,24 +126,6 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected
     double precision :: lambda, delta, prob_inf, prob_rec
     common /parameters/ lambda, delta
 
-    ! Construct main vector
-    neighbours = 0
-    pointer_f = pointer_i - 1
-    rewind(unit = 1)
-
-    ! Save active links to neighbours
-    do
-        read(unit = 1, fmt = *, iostat = iostat)  node1, node2
-        if (iostat .ne. 0) exit
-        pointer_f(node1) = pointer_f(node1) + 1
-        pointer_f(node2) = pointer_f(node2) + 1
-        ! The link is active only if one node is S and the other is I
-        if (infected_list(node1).eq.0.and.infected_list(node2).eq.1.or.infected_list(node1).eq.1.and.infected_list(node2).eq.0) then
-            neighbours(pointer_f(node1)) = node2 
-            neighbours(pointer_f(node2)) = node1 
-            n_links = n_links + 1
-        endif
-    enddo
 
     ! Count status of all nodes (S = 0, I = 1, R = 2 )
     status_count = 0
