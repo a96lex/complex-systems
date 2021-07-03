@@ -119,7 +119,7 @@ program main
 
     ! Perform Gillespie algorithm simulation
     do i = 1, total_iterations
-        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, infected_list, n_links)
+        call time_step_gillespie(E, N, neighbours, pointer_i, pointer_f, infected_list, n_links, infected_list_pointer)
     enddo
 
     ! Close all i/o files
@@ -128,13 +128,12 @@ program main
 
 end program main
  
-subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected_list, n_links)
+subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected_list, n_links, infected_list_pointer)
     implicit none
-    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), infected_list(N)
-    integer :: iostat, node1, node2, i, n_links, status_count(3) 
+    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), infected_list(N), infected_list_pointer(2*E), active_links(2,2*E)
+    integer :: i, n_links, status_count(3) 
     double precision :: lambda, delta, prob_inf, prob_rec
     common /parameters/ lambda, delta
-
 
     ! Count status of all nodes (S = 0, I = 1, R = 2 )
     status_count = 0
@@ -153,13 +152,48 @@ subroutine time_step_gillespie(E, N , neighbours, pointer_i, pointer_f, infected
     do i = 1, N
         ! If susceptible, try to infect
         if (infected_list(i).eq.0) then
-            if (rand() < prob_inf) infected_list(i) = 1
-        ! If infected, try to recover
+            if (rand() < prob_inf) then
+                 infected_list(i) = 1
+                call update_active_link_list(E, N, neighbours, pointer_i, pointer_f, &
+                     infected_list, active_links, infected_list_pointer, n_links, i, .true.)
+            endif
+       ! If infected, try to recover
         elseif (infected_list(i).eq.1) then
-            if (rand() < prob_rec) infected_list(i) = 2
-        endif
+            if (rand() < prob_rec) then
+                 infected_list(i) = 2
+                call update_active_link_list(E, N, neighbours, pointer_i, pointer_f, &
+                     infected_list, active_links, infected_list_pointer, n_links, i, .false.)
+            endif
+        endif   
     enddo
 
 end subroutine time_step_gillespie
 
 
+subroutine update_active_link_list(E, N, neighbours, pointer_i, pointer_f, &
+     infected_list, active_links, infected_list_pointer, n_links, index, is_infected)
+    implicit none
+    integer :: E, N, neighbours(2*E), pointer_i(N), pointer_f(N), infected_list(N) 
+    integer :: active_links(2,2*E), infected_list_pointer(2*E), index, i, n_links
+    logical :: is_infected
+
+    if (is_infected) then 
+        do i = pointer_i(index), pointer_f(index)
+            if (infected_list(i).eq.0) then
+                active_links(1,n_links) = index
+                active_links(2,n_links) = neighbours(i)
+                infected_list_pointer(i) = n_links
+                n_links = n_links + 1
+            endif
+        enddo
+    else
+        do i = pointer_i(index), pointer_f(index)
+            if (infected_list_pointer(i).ne.0) then
+                active_links(:,infected_list_pointer(i)) = active_links(:,n_links)
+                active_links(:,n_links) = 0
+                n_links = n_links - 1
+            endif
+        enddo
+    endif
+
+end subroutine update_active_link_list
