@@ -59,7 +59,6 @@ program main
     ! Find cardinality of all nodes
     rewind(unit = 1)
     cardinality = 0
-    n_links = 0
     do
         read(unit = 1, fmt = *, iostat = iostat)  node1, node2
         if (iostat .ne. 0) exit 
@@ -92,6 +91,7 @@ program main
     active_links = 0
     infected_list_pointer = 0
     pointer_f = pointer_i - 1
+    n_links = 1
     rewind(unit = 1)
 
     ! Save active links to neighbours
@@ -100,10 +100,19 @@ program main
         if (iostat .ne. 0) exit
         pointer_f(node1) = pointer_f(node1) + 1
         pointer_f(node2) = pointer_f(node2) + 1
+        neighbours(pointer_f(node1)) = node2 
+        neighbours(pointer_f(node2)) = node1 
         ! The link is active only if one node is S and the other is I
-        if (infected_list(node1).eq.0.and.infected_list(node2).eq.1.or.infected_list(node1).eq.1.and.infected_list(node2).eq.0) then
-            neighbours(pointer_f(node1)) = node2 
-            neighbours(pointer_f(node2)) = node1 
+        if (infected_list(node1).eq.0.and.infected_list(node2).eq.1) then
+            active_links(n_links,1) = node2
+            active_links(n_links,2) = node1
+            infected_list_pointer(pointer_f(node2)) = n_links 
+            n_links = n_links + 1
+        endif
+        if (infected_list(node1).eq.1.and.infected_list(node2).eq.0) then
+            active_links(n_links,1) = node2
+            active_links(n_links,2) = node1
+            infected_list_pointer(pointer_f(node1)) = n_links 
             n_links = n_links + 1
         endif
     enddo
