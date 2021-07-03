@@ -32,6 +32,7 @@ program main
 
     ! Check for input errors
     if (ioerror.ne.0) then
+        print*, ioerror
         print*, "At least one of the command line arguments is wrong. Check readme.md to learn how to properly use this code"
         stop
     endif
@@ -54,7 +55,9 @@ program main
     enddo
 
     ! Allocate vectors
-    allocate(active_links(2,2*E), neighbours(2*E), pointer_i(N), pointer_f(N), cardinality(N),infected_list(N))
+    allocate(neighbours(2*E), infected_list_pointer(2*E))
+    allocate(active_links(2,2*E))
+    allocate(pointer_i(N), pointer_f(N), cardinality(N) ,infected_list(N))
 
     ! Find cardinality of all nodes
     rewind(unit = 1)
