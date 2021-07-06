@@ -8,9 +8,9 @@ class iInput:
     Interface of input parameters for executing Fortran code
     """
 
-    filename = "nets/net1000.dat"
+    filename = "net50000.dat"
     initial_infected_rate = 0.01
-    _lambda = 0.0001
+    _lambda = 0.0015
     delta = 0.5
     iterations = 20
 
@@ -80,7 +80,6 @@ def labda_dependency():
         execute_cmd(input=i)
         S, I, R = parse_output(input_file="sir.out")
         plt.plot(I, label=f"lambda: {i._lambda}")
-
         # modify interface
         i._lambda += 0.02
 
@@ -90,8 +89,32 @@ def labda_dependency():
     plt.savefig("figures/lambda_dependency.png")
     plt.close()
 
+def recovery_dependency():
+    # create Fortran interface object
+    i = iInput()
+    lamb = []
+    Rt= []
+    # create a plot for each input interface
+    for _ in range(5):
+        execute_cmd(input=i)
+        S, I, R = parse_output(input_file="sir.out")
+        Rf = R[-1]
+        Rt.append(Rf)
+        lamb.append(i._lambda)
+
+        # modify interface
+        i._lambda += 0.02
+
+    plt.plot(lamb, Rt )
+    plt.ylabel("Total Infected")
+    plt.xlabel("Lambda")
+   
+    plt.savefig("figures/recovery_dependency.png")
+    plt.close()
+
 
 if __name__ == "__main__":
     os.system("gfortran -o main.x main.f90")
     sir_over_time()
     labda_dependency()
+    recovery_dependency()
