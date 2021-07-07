@@ -84,7 +84,7 @@ def labda_dependency(i=iInput()):
     for _ in range(5):
         execute_cmd(input=i)
         S, I, R = parse_output(input_file="sir.out")
-        plt.plot(I, label=f"lambda: {i._lambda}")
+        plt.plot(I, label=f"lambda: {i._lambda:.4f}")
         # modify interface
         i._lambda += 0.02
 
