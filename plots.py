@@ -89,11 +89,12 @@ def labda_dependency():
     plt.savefig("figures/lambda_dependency.png")
     plt.close()
 
+
 def recovery_dependency():
     # create Fortran interface object
     i = iInput()
     lamb = []
-    Rt= []
+    Rt = []
     # create a plot for each input interface
     for _ in range(5):
         execute_cmd(input=i)
@@ -105,10 +106,10 @@ def recovery_dependency():
         # modify interface
         i._lambda += 0.02
 
-    plt.plot(lamb, Rt )
+    plt.plot(lamb, Rt)
     plt.ylabel("Total Infected")
     plt.xlabel("Lambda")
-   
+
     plt.savefig("figures/recovery_dependency.png")
     plt.close()
 
