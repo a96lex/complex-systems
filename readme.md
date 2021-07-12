@@ -24,7 +24,7 @@ gfortran -o main.x main.f90
 
 ### :snake: Usage with Python
 
-Additionally, a python interface was developed to interact with the compiled Fortran code. In there, you can use the three existing functions `sir_over_time`, `labda_dependency` and `recovery_dependency`.
+Additionally, a python interface was developed to interact with the compiled Fortran code. In there, you can use the three existing functions `sir_over_time`, `lambda_dependency` and `recovery_dependency`.
 
 The input arguments are attributes of an object of the classs `iInput`, which can be modified either on its definition or by setting individual values after the object creation.
 

@@ -78,7 +78,7 @@ def sir_over_time(i=iInput()):
     plt.close()
 
 
-def labda_dependency(i=iInput()):
+def lambda_dependency(i=iInput()):
     i._lambda = 0.0015
     # create a plot for each input interface
     for _ in range(5):
@@ -118,7 +118,7 @@ def recovery_dependency(i=iInput()):
 
 def run(input=iInput()):
     sir_over_time(i=input)
-    labda_dependency(i=input)
+    lambda_dependency(i=input)
     recovery_dependency(i=input)
 
 
