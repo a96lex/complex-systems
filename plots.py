@@ -99,7 +99,7 @@ def recovery_dependency(i=iInput()):
     lamb = []
     Rt = []
     # create a plot for each input interface
-    for _ in range(5):
+    for _ in range(25):
         execute_cmd(input=i)
         S, I, R = parse_output(input_file="sir.out")
         Rf = R[-1]
@@ -107,12 +107,11 @@ def recovery_dependency(i=iInput()):
         lamb.append(i._lambda)
 
         # modify interface
-        i._lambda += 0.02
+        i._lambda += 0.002
 
     plt.plot(lamb, Rt)
     plt.ylabel("Total Infected")
     plt.xlabel("Lambda")
-
     plt.savefig(f"{i.output_path}/recovery_dependency.png")
     plt.close()
 
