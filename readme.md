@@ -30,7 +30,7 @@ The input arguments are attributes of an object of the classs `iInput`, which ca
 
 The python script will compile and execute the Fortran code using the `os` library.
 
-## 🧫Results
+## 🧫 Results
 
 SIR over time ( lambda = 0.0015, delta = 0.5, initial infected rate = 0.1 )
 
