@@ -32,20 +32,22 @@ The python script will compile and execute the Fortran code using the `os` libra
 
 ## 🧫 Results
 
-SIR over time ( lambda = 0.0015, delta = 0.5, initial infected rate = 0.1 )
+#### SIR over time
+ lambda = 0.0015, delta = 0.5, initial infected rate = 0.1 )
 
 |            1.000 nodes net             |            50.000 nodes net             |
 | :------------------------------------: | :-------------------------------------: |
 | ![](figures/net1000/sir_over_time.png) | ![](figures/net50000/sir_over_time.png) |
 
-Lambda dependency ( lambda = 0.0015 to 0.0815, delta = 0.5, initial infected rate = 0.1 )
+#### Lambda dependency
+( lambda = 0.0015 to 0.0815, delta = 0.5, initial infected rate = 0.1 )
 
 |              1.000 nodes net               |              50.000 nodes net               |
 | :----------------------------------------: | :-----------------------------------------: |
 | ![](figures/net1000/lambda_dependency.png) | ![](figures/net50000/lambda_dependency.png) |
 
-0.002
-Recovery dependency ( lambda = 0.0015 to 0.0515, delta = 0.5, initial infected rate = 0.1 )
+#### Recovery dependency
+( lambda = 0.0015 to 0.0515, delta = 0.5, initial infected rate = 0.1 )
 
 |               1.000 nodes net                |               50.000 nodes net                |
 | :------------------------------------------: | :-------------------------------------------: |
